@@ -34,10 +34,10 @@ class CrowdSecConnector:
         self.crowdsec_ent_desc = get_config_variable(
             "CROWDSEC_DESCRIPTION", ["crowdsec", "description"], config
         )
-        if self.crowdsec_api_version != "v1":
+        if self.crowdsec_api_version != "v2":
             raise Exception(f"crowdsec api version '{self.crowdsec_api_version}' is not supported ")
         else:
-            self.api_base_url = f"https://cti.api.crowdsec.net/{self.crowdsec_api_version}/"
+            self.api_base_url = f"https://cti.api.dev.crowdsec.net/{self.crowdsec_api_version}/"
 
         self.max_tlp = get_config_variable("CROWDSEC_MAX_TLP", ["crowdsec", "max_tlp"], config)
 
@@ -58,7 +58,7 @@ class CrowdSecConnector:
                 self.helper.log_warning(
                     f"CrowdSec CTI returned {resp.status_code} response status code. Retrying.."
                 )
-            sleep(2**i)
+            sleep(2 ** i)
 
     def get_or_create_crowdsec_ent_id(self) -> int:
         if getattr(self, "crowdsec_id", None) is not None:

@@ -13,7 +13,7 @@ connector:
 
 crowdsec:
   key: ChangeMe
-  api_version: v1
+  api_version: v2
   name: CrowdSec
   description: CrowdSec CTI
   max_tlp: 'TLP:AMBER'
