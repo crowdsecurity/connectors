@@ -13,6 +13,8 @@ from pycti import OpenCTIConnectorHelper, get_config_variable
 CVE_REGEX = re.compile(r"CVE-\d{4}-\d{4,7}", re.IGNORECASE)
 find_all_cve = CVE_REGEX.findall
 
+class QuotaExceedException(Exception):
+    pass
 
 class CrowdSecConnector:
     def __init__(self):
@@ -58,9 +60,7 @@ class CrowdSecConnector:
             if resp.status_code == 404:
                 return {}
             elif resp.status_code == 429:
-                self.helper.log_warning(
-                    f"API call quota exceeded, will retry after {2**i}s"
-                )
+                raise QuotaExceedException("Quota exceeded for CrowdSec CTI API. Please visit https://www.crowdsec.net/pricing to upgrade your plan.")
             elif resp.status_code == 200:
                 return resp.json()
             else:
@@ -89,7 +89,12 @@ class CrowdSecConnector:
     def enrich_observable_with_crowdsec(self, observable):
         observable_id = observable["standard_id"]
         ip = observable["value"]
-        cti_data = self.get_crowdsec_cti_for_ip(ip)
+
+        try:
+            cti_data = self.get_crowdsec_cti_for_ip(ip)
+        except QuotaExceedException as e:
+            raise e
+
         if not cti_data:
             return
 
